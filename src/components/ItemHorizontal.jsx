@@ -4,11 +4,10 @@ import { Image } from "expo-image";
 import { Bookmark } from "lucide-react-native";
 import {useNavigation} from '@react-navigation/native';
 
-const navigation = useNavigation();
 const ItemHorizontal = ({ item, isBookmarked, onPress }) => {
+  const navigation = useNavigation();
   return (
-  <TouchableOpacity style={styles.cardItem} onPress={() => navigation.navigate('BlogDetail', {blogId: item.id})}>    
-  <View style={styles.cardItem}>
+  <TouchableOpacity style={styles.cardItem} onPress={() => navigation.navigate('BlogDetail', {blogId: item.id})}>
       <Image
         style={styles.cardImage}
         source={{ uri: item.image }}
@@ -17,7 +16,6 @@ const ItemHorizontal = ({ item, isBookmarked, onPress }) => {
         cachePolicy="memory-disk"
         transition={300}
       />
-
       <View style={styles.overlayContainer}>
         <View style={styles.cardContent}>
           <View style={styles.cardInfo}>
@@ -37,7 +35,6 @@ const ItemHorizontal = ({ item, isBookmarked, onPress }) => {
           </View>
         </View>
       </View>
-    </View>
     </TouchableOpacity>
     
   );

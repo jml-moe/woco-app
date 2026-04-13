@@ -8,7 +8,8 @@ import Home from "../screens/Home";
 import Discover from "../screens/Discover";
 import Bookmark from "../screens/Bookmark";
 import Profile from "../screens/Profile";
-import BlogDetail from "../screens/BlogDetail";import {
+import BlogDetail from "../screens/BlogDetail";
+import {
   Home as HomeIcon,
   Compass,
   Bookmark as BookmarkIcon,

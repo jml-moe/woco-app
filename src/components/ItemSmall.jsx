@@ -3,13 +3,11 @@ import { Image } from "expo-image";
 import { ReceiptText, Clock, MessageCircle } from "lucide-react-native";
 import { colors } from "../../assets/theme";
 import { useNavigation } from "@react-navigation/native";
-
-const navigation = useNavigation();
-
+  
 const ItemSmall = ({ item }) => {
+  const navigation = useNavigation();
   return (
     <TouchableOpacity style={styles.cardItem} onPress={() => navigation.navigate('BlogDetail', {blogId: item.id})}>
-    <View style={styles.cardItem}>
       <Image
         style={styles.cardImage}
         source={{
@@ -40,7 +38,6 @@ const ItemSmall = ({ item }) => {
           <Text style={styles.cardText}>{item.totalComments}</Text>
         </View>
       </View>
-    </View>
     </TouchableOpacity>  
   );
 };

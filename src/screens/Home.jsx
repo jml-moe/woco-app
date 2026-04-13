@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Menu } from "lucide-react-native";
-import { colors } from "./assets/theme";
-import ListBlog from "./src/components/ListBlog";
-import { CategoryList } from "./src/data/categories";
+import { colors } from "../../assets/theme";
+import ListBlog from "../components/ListBlog";
+import { CategoryList } from "../data/categories";
 import { useFonts } from "expo-font";
 
 export default function Home() {
