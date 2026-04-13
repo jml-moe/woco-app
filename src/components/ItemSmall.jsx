@@ -1,10 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { ReceiptText, Clock, MessageCircle } from "lucide-react-native";
 import { colors } from "../../assets/theme";
+import { useNavigation } from "@react-navigation/native";
+
+const navigation = useNavigation();
 
 const ItemSmall = ({ item }) => {
   return (
+    <TouchableOpacity style={styles.cardItem} onPress={() => navigation.navigate('BlogDetail', {blogId: item.id})}>
     <View style={styles.cardItem}>
       <Image
         style={styles.cardImage}
@@ -37,6 +41,7 @@ const ItemSmall = ({ item }) => {
         </View>
       </View>
     </View>
+    </TouchableOpacity>  
   );
 };
 

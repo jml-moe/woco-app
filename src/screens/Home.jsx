@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Bell, Menu } from "lucide-react-native";
+import { Menu } from "lucide-react-native";
 import { colors } from "./assets/theme";
 import ListBlog from "./src/components/ListBlog";
 import { CategoryList } from "./src/data/categories";

@@ -2,10 +2,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { colors } from "../../assets/theme";
 import { Image } from "expo-image";
 import { Bookmark } from "lucide-react-native";
+import {useNavigation} from '@react-navigation/native';
 
+const navigation = useNavigation();
 const ItemHorizontal = ({ item, isBookmarked, onPress }) => {
   return (
-    <View style={styles.cardItem}>
+  <TouchableOpacity style={styles.cardItem} onPress={() => navigation.navigate('BlogDetail', {blogId: item.id})}>    
+  <View style={styles.cardItem}>
       <Image
         style={styles.cardImage}
         source={{ uri: item.image }}
@@ -35,6 +38,8 @@ const ItemHorizontal = ({ item, isBookmarked, onPress }) => {
         </View>
       </View>
     </View>
+    </TouchableOpacity>
+    
   );
 };
 
