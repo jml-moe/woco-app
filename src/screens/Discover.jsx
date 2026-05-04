@@ -5,6 +5,7 @@ import { BlogList } from "../data/blogs";
 import ItemSmall from "../components/ItemSmall";
 import { Search } from "lucide-react-native";
 import { colors } from "../../assets/theme";
+import {useNavigation} from '@react-navigation/native';
 
 const data = [
   { id: 1, label: "React" },
@@ -39,6 +40,7 @@ const FlatListRecent = () => {
 };
 
 const Discover = () => {
+  const navigation = useNavigation();
   const scrollY = useRef(new Animated.Value(0)).current;
   const diffClampY = Animated.diffClamp(scrollY, 0, 142);
   const recentY = diffClampY.interpolate({
@@ -52,10 +54,15 @@ const Discover = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <View style={styles.header}>
+          <Pressable
+            onPress={() => navigation.navigate("SearchPage")}
+            style={{ flex: 1 }}
+          >
           <View style={styles.bar}>
             <Search size={18} color={colors.grey(0.5)} />
             <Text style={styles.placeholder}>Search</Text>
           </View>
+          </Pressable>
         </View>
         <Animated.View
           style={[recent.container, { transform: [{ translateY: recentY }] }]}

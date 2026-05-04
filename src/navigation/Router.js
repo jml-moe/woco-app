@@ -16,7 +16,8 @@ import {
   User,
 } from "lucide-react-native";
 import { colors } from "../../assets/theme";
-
+import Search from "../screens/Search";
+import AddBlogForm from "../screens/AddBlogForm";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -90,6 +91,30 @@ const Router = () => {
       <Stack.Screen
         name="BlogDetail"
         component={BlogDetail}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
+          animationTypeForReplace: "pop",
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Stack.Screen
+        name="SearchPage"
+        component={Search}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
+          animationTypeForReplace: "pop",
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Stack.Screen
+        name="AddBlog"
+        component={AddBlogForm}
         options={{
           headerShown: false,
           animationEnabled: true,
