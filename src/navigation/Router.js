@@ -9,6 +9,9 @@ import Discover from "../screens/Discover";
 import Bookmark from "../screens/Bookmark";
 import Profile from "../screens/Profile";
 import BlogDetail from "../screens/BlogDetail";
+import SplashScreen from "../screens/SplashScreen";
+import Register from "../screens/Register";
+import Login from "../screens/Login";
 import {
   Home as HomeIcon,
   Compass,
@@ -82,7 +85,43 @@ function MainApp() {
 
 const Router = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="SplashScreen">
+      <Stack.Screen
+        name="SplashScreen"
+        component={SplashScreen}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
+          animationTypeForReplace: "pop",
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Stack.Screen
+        name="Register"
+        component={Register}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
+          animationTypeForReplace: "pop",
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Stack.Screen
+        name="Login"
+        component={Login}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
+          animationTypeForReplace: "pop",
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
       <Stack.Screen
         name="MainApp"
         component={MainApp}

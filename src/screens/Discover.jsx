@@ -1,11 +1,18 @@
-import { StyleSheet, Text, View, FlatList, Animated } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Animated,
+  Pressable,
+} from "react-native";
 import React, { useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlogList } from "../data/blogs";
 import ItemSmall from "../components/ItemSmall";
 import { Search } from "lucide-react-native";
 import { colors } from "../../assets/theme";
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 const data = [
   { id: 1, label: "React" },
@@ -58,10 +65,10 @@ const Discover = () => {
             onPress={() => navigation.navigate("SearchPage")}
             style={{ flex: 1 }}
           >
-          <View style={styles.bar}>
-            <Search size={18} color={colors.grey(0.5)} />
-            <Text style={styles.placeholder}>Search</Text>
-          </View>
+            <View style={styles.bar}>
+              <Search size={18} color={colors.grey(0.5)} />
+              <Text style={styles.placeholder}>Search</Text>
+            </View>
           </Pressable>
         </View>
         <Animated.View
