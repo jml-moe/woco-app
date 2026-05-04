@@ -4,9 +4,10 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   ArrowLeft,
   Heart,
@@ -34,6 +35,17 @@ const formatNumber = (number) => {
 };
 
 const BlogDetail = ({ route }) => {
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const diffClampY = Animated.diffClamp(scrollY, 0, 52);
+  const headerY = diffClampY.interpolate({
+    inputRange: [0, 52],
+    outputRange: [0, -52],
+  });
+  const bottomBarY = diffClampY.interpolate({
+    inputRange: [0, 52],
+    outputRange: [0, 52],
+  });
+
   const { blogId } = route.params;
   const [iconStates, setIconStates] = useState({
     liked: { variant: "Linear", color: colors.grey(0.6) },
@@ -60,7 +72,9 @@ const BlogDetail = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View
+        style={[styles.header, { transform: [{ translateY: scrollY }] }]}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft color={colors.grey(0.6)} size={24} />
         </TouchableOpacity>
@@ -70,10 +84,14 @@ const BlogDetail = ({ route }) => {
           <Share2 color={colors.grey(0.6)} size={24} />
           <MoreVertical color={colors.grey(0.6)} size={24} />
         </View>
-      </View>
+      </Animated.View>
 
-      <ScrollView
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true },
+        )}
         contentContainerStyle={{
           paddingHorizontal: 24,
           paddingTop: 62,
@@ -94,9 +112,11 @@ const BlogDetail = ({ route }) => {
 
         <Text style={styles.title}>{selectedBlog.title}</Text>
         <Text style={styles.content}>{selectedBlog.content}</Text>
-      </ScrollView>
+      </Animated.ScrollView>
 
-      <View style={styles.bottomBar}>
+      <Animated.View
+        style={[styles.bottomBar, { transform: [{ translateY: bottomBarY }] }]}
+      >
         <View style={styles.interactionItem}>
           <TouchableOpacity onPress={() => toggleIcon("liked")}>
             <Heart
@@ -132,7 +152,7 @@ const BlogDetail = ({ route }) => {
             size={24}
           />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };
