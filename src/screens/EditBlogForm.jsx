@@ -1,21 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  TouchableOpacity,
+  Alert,
 } from "react-native";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, AddSquare, Add } from "iconsax-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../assets/theme";
 import axios from "axios";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const AddBlogForm = () => {
-  const [loading, setLoading] = useState(false);
+const EditBlogForm = ({ route }) => {
+  const { blogId } = route.params;
   const dataCategory = [
     { id: 1, name: "Food" },
     { id: 2, name: "Sports" },
@@ -26,16 +27,15 @@ const AddBlogForm = () => {
     { id: 7, name: "Music" },
     { id: 8, name: "Car" },
   ];
-
   const [blogData, setBlogData] = useState({
     title: "",
     content: "",
+    image: "",
     category: {},
     totalLikes: 0,
     totalComments: 0,
   });
-
-  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
   const handleChange = (key, value) => {
@@ -45,43 +45,74 @@ const AddBlogForm = () => {
     });
   };
 
-  const handleUpload = async () => {
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        await axios
+          .get(`https://6a02c9270d92f63dd2541520.mockapi.io/blog/${blogId}`)
+          .then((response) => {
+            const data = response.data;
+            if (data) {
+              setBlogData({
+                title: data.title,
+                content: data.content,
+                image: data.image,
+                category: data.category,
+                totalLikes: data.totalLikes || 0,
+                totalComments: data.totalComments || 0,
+              });
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      } catch (error) {
+        console.error("Error fetching blog:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [blogId]);
+
+  const handleUpdate = async () => {
     setLoading(true);
     try {
       await axios
-        .post("https://6a02c9270d92f63dd2541520.mockapi.io/blog", {
+        .put(`https://6a02c9270d92f63dd2541520.mockapi.io/blog/${blogId}`, {
           title: blogData.title,
-          category: blogData.category,
-          image,
           content: blogData.content,
-          totalComments: blogData.totalComments,
+          image: blogData.image,
+          category: blogData.category,
           totalLikes: blogData.totalLikes,
-          createdAt: new Date(),
+          totalComments: blogData.totalComments,
         })
-        .then(function (response) {
-          console.log(response);
+        .then((response) => {
+          console.log(response.data);
         })
         .catch(function (error) {
           console.log(error);
         });
+
       setLoading(false);
-      navigation.navigate("MainApp", { screen: "Profile" });
-    } catch (e) {
-      console.log(e);
+      navigation.navigate("BlogDetail", { blogId });
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft color={colors.black()} variant="Linear" size={24} />
-        </Pressable>
+        </TouchableOpacity>
         <View style={{ flex: 1, alignItems: "center" }}>
-          <Text style={styles.title}>Write blog</Text>
+          <Text style={styles.title}>Edit blog</Text>
         </View>
       </View>
-
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 24,
@@ -99,7 +130,6 @@ const AddBlogForm = () => {
             style={textInput.title}
           />
         </View>
-
         <View style={[textInput.borderDashed, { minHeight: 250 }]}>
           <TextInput
             placeholder="Content"
@@ -110,19 +140,25 @@ const AddBlogForm = () => {
             style={textInput.content}
           />
         </View>
-
         <View style={textInput.borderDashed}>
           <TextInput
             placeholder="Image"
-            value={image}
-            onChangeText={(text) => setImage(text)}
+            value={blogData.image}
+            onChangeText={(text) => handleChange("image", text)}
             placeholderTextColor={colors.grey(0.6)}
             style={textInput.content}
           />
         </View>
-
-        <View style={textInput.borderDashed}>
-          <Text style={category.title}>Category</Text>
+        <View style={[textInput.borderDashed]}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontFamily: "Pjs-Regular",
+              color: colors.grey(0.6),
+            }}
+          >
+            Category
+          </Text>
           <View style={category.container}>
             {dataCategory.map((item, index) => {
               const bgColor =
@@ -133,31 +169,26 @@ const AddBlogForm = () => {
                 item.id === blogData.category.id
                   ? colors.white()
                   : colors.grey();
-
               return (
-                <Pressable
+                <TouchableOpacity
                   key={index}
                   onPress={() =>
                     handleChange("category", { id: item.id, name: item.name })
                   }
-                  style={({ pressed }) => [
-                    category.item,
-                    { backgroundColor: bgColor, opacity: pressed ? 0.7 : 1 },
-                  ]}
+                  style={[category.item, { backgroundColor: bgColor }]}
                 >
                   <Text style={[category.name, { color: color }]}>
                     {item.name}
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
               );
             })}
           </View>
         </View>
       </ScrollView>
-
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.button} onPress={handleUpload}>
-          <Text style={styles.buttonLabel}>Upload</Text>
+        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+          <Text style={styles.buttonLabel}>Update</Text>
         </TouchableOpacity>
       </View>
       {loading && (
@@ -165,11 +196,11 @@ const AddBlogForm = () => {
           <ActivityIndicator size="large" color={colors.blue()} />
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
-export default AddBlogForm;
+export default EditBlogForm;
 
 const styles = StyleSheet.create({
   container: {
@@ -195,13 +226,14 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingHorizontal: 24,
     paddingVertical: 10,
-    elevation: 5,
   },
   button: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: colors.blue(),
     borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonLabel: {
     fontSize: 14,
@@ -219,7 +251,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
 const textInput = StyleSheet.create({
   borderDashed: {
     borderStyle: "dashed",
@@ -241,7 +272,6 @@ const textInput = StyleSheet.create({
     padding: 0,
   },
 });
-
 const category = StyleSheet.create({
   title: {
     fontSize: 12,

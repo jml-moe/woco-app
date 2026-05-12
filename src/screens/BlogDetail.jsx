@@ -5,9 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   Heart,
@@ -15,26 +19,82 @@ import {
   MessageCircle,
   Share2,
   MoreVertical,
+  Edit,
+  Trash,
 } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
-import { BlogList } from "../data/blogs";
 import { Image } from "expo-image";
 import { colors } from "../../assets/theme";
-
-const formatNumber = (number) => {
-  if (number >= 1000000000) {
-    return (number / 1000000000).toFixed(1).replace(/\.0$/, "") + "B";
-  }
-  if (number >= 1000000) {
-    return (number / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-  }
-  if (number >= 1000) {
-    return (number / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-  return number.toString();
-};
+import { formatNumber } from "../utils/formatNumber";
+import { formatDate } from "../utils/formatDate";
+import axios from "axios";
 
 const BlogDetail = ({ route }) => {
+  const { blogId } = route.params;
+  const [iconStates, setIconStates] = useState({
+    liked: { variant: "Linear", color: colors.grey(0.6) },
+    bookmarked: { variant: "Linear", color: colors.grey(0.6) },
+  });
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  useEffect(() => {
+    getBlogById();
+  }, [blogId]);
+
+  const getBlogById = async () => {
+    try {
+      const response = await axios.get(
+        `https://6a02c9270d92f63dd2541520.mockapi.io/blog/${blogId}`,
+      );
+      setSelectedBlog(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const navigateEdit = (id) => {
+    navigation.navigate("EditBlog", { blogId: id });
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Blog",
+      "Are you sure you want to delete this blog?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await axios
+                .delete(
+                  `https://6a02c9270d92f63dd2541520.mockapi.io/blog/${blogId}`,
+                )
+                .then(() => {
+                  navigation.navigate("MainApp", { screen: "Profile" });
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
+              navigation.navigate("MainApp", { screen: "Profile" });
+            } catch (error) {
+              console.error(error);
+              Alert.alert("Error", "Failed to delete blog");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
   const scrollY = useRef(new Animated.Value(0)).current;
   const diffClampY = Animated.diffClamp(scrollY, 0, 52);
   const headerY = diffClampY.interpolate({
@@ -46,13 +106,6 @@ const BlogDetail = ({ route }) => {
     outputRange: [0, 52],
   });
 
-  const { blogId } = route.params;
-  const [iconStates, setIconStates] = useState({
-    liked: { variant: "Linear", color: colors.grey(0.6) },
-    bookmarked: { variant: "Linear", color: colors.grey(0.6) },
-  });
-
-  const selectedBlog = BlogList.find((blog) => blog.id === blogId);
   const navigation = useNavigation();
 
   const toggleIcon = (iconName) => {
@@ -68,12 +121,23 @@ const BlogDetail = ({ route }) => {
     }));
   };
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.blue()} />
+      </View>
+    );
+  }
+
   if (!selectedBlog) return null;
+
+  const openMenu = () => setMenuVisible(true);
+  const closeMenu = () => setMenuVisible(false);
 
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View
-        style={[styles.header, { transform: [{ translateY: scrollY }] }]}
+        style={[styles.header, { transform: [{ translateY: headerY }] }]}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft color={colors.grey(0.6)} size={24} />
@@ -82,7 +146,7 @@ const BlogDetail = ({ route }) => {
           style={{ flexDirection: "row", justifyContent: "center", gap: 20 }}
         >
           <Share2 color={colors.grey(0.6)} size={24} />
-          <MoreVertical color={colors.grey(0.6)} size={24} />
+          <MoreVertical color={colors.grey(0.6)} size={24} onPress={openMenu} />
         </View>
       </Animated.View>
 
@@ -95,7 +159,7 @@ const BlogDetail = ({ route }) => {
         contentContainerStyle={{
           paddingHorizontal: 24,
           paddingTop: 62,
-          paddingBottom: 80,
+          paddingBottom: 54,
         }}
       >
         <Image
@@ -106,8 +170,12 @@ const BlogDetail = ({ route }) => {
         />
 
         <View style={styles.metaContainer}>
-          <Text style={styles.category}>{selectedBlog.category}</Text>
-          <Text style={styles.date}>{selectedBlog.createdAt}</Text>
+          <Text style={styles.category}>
+            {typeof selectedBlog.category === "object"
+              ? selectedBlog.category.name
+              : selectedBlog.category}
+          </Text>
+          <Text style={styles.date}>{formatDate(selectedBlog.createdAt)}</Text>
         </View>
 
         <Text style={styles.title}>{selectedBlog.title}</Text>
@@ -153,6 +221,41 @@ const BlogDetail = ({ route }) => {
           />
         </TouchableOpacity>
       </Animated.View>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={menuVisible}
+        onRequestClose={closeMenu}
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeMenu}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                closeMenu();
+                navigateEdit(selectedBlog.id);
+              }}
+            >
+              <Edit color={colors.black()} size={20} />
+              <Text style={styles.menuText}>Edit</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                closeMenu();
+                handleDelete();
+              }}
+            >
+              <Trash color={colors.red()} size={20} />
+              <Text style={[styles.menuText, { color: colors.red() }]}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -235,5 +338,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 20,
     marginTop: 15,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.1)",
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: colors.white(),
+    marginTop: 60,
+    marginRight: 24,
+    borderRadius: 10,
+    padding: 8,
+    width: 150,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    gap: 12,
+  },
+  menuText: {
+    fontSize: 14,
+    fontFamily: "Pjs-SemiBold",
+    color: colors.black(),
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colors.grey(0.1),
+    marginHorizontal: 8,
   },
 });

@@ -21,6 +21,7 @@ import {
 import { colors } from "../../assets/theme";
 import Search from "../screens/Search";
 import AddBlogForm from "../screens/AddBlogForm";
+import EditBlogForm from "../screens/EditBlogForm";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -154,6 +155,18 @@ const Router = () => {
       <Stack.Screen
         name="AddBlog"
         component={AddBlogForm}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
+          animationTypeForReplace: "pop",
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      />
+      <Stack.Screen
+        name="EditBlog"
+        component={EditBlogForm}
         options={{
           headerShown: false,
           animationEnabled: true,
